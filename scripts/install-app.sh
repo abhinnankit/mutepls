@@ -6,13 +6,19 @@ APP_NAME="MutePls.app"
 SOURCE_APP="$PROJECT_DIR/dist/$APP_NAME"
 TARGET_APP="/Applications/$APP_NAME"
 
-if [[ ! -d "$SOURCE_APP" ]]; then
-    "$PROJECT_DIR/scripts/package-app.sh"
+"$PROJECT_DIR/scripts/package-app.sh"
+
+if [[ ! -f "$SOURCE_APP/Contents/Resources/MutePls.icns" ]]; then
+    echo "Missing app icon at $SOURCE_APP/Contents/Resources/MutePls.icns"
+    exit 1
 fi
 
 rm -rf "$TARGET_APP"
 cp -R "$SOURCE_APP" "$TARGET_APP"
+touch "$TARGET_APP"
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+    -f "$TARGET_APP" >/dev/null 2>&1 || true
 
 echo "Installed $TARGET_APP"
 echo "Open it with:"
-echo "  open \"$TARGET_APP\""
+echo "  open -n \"$TARGET_APP\""

@@ -33,8 +33,9 @@ open:
 	open "$(APP_BUNDLE)"
 
 reinstall: install
-	-killall "$(APP_NAME)" 2>/dev/null
-	open "$(APP_BUNDLE)"
+	@killall "$(APP_NAME)" 2>/dev/null || true
+	@sleep 0.5
+	open -n "$(APP_BUNDLE)"
 
 clean:
 	rm -rf .build .swiftpm dist

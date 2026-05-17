@@ -17,6 +17,12 @@ It also includes a Play/Pause media-key fallback for AirPods Max 2 setups where 
 make build
 ```
 
+See all available commands:
+
+```sh
+make help
+```
+
 ## Run
 
 ```sh
@@ -35,6 +41,8 @@ This creates:
 dist/MutePls.app
 ```
 
+The package step also generates `Assets/MutePls.icns` and includes it in the app bundle.
+
 Install it into `/Applications`:
 
 ```sh
@@ -48,6 +56,13 @@ Install, restart, and open the app in one command:
 make reinstall
 ```
 
+If Finder still shows the generic app icon after reinstalling, refresh Finder's icon cache for the bundle:
+
+```sh
+touch /Applications/MutePls.app
+killall Finder
+```
+
 ## Start at login
 
 After installing and opening `/Applications/MutePls.app`, right-click the menu bar icon and enable:
@@ -57,6 +72,12 @@ Start at Login
 ```
 
 The item is checked when the LaunchAgent is installed.
+
+The app manages this through:
+
+```text
+~/Library/LaunchAgents/dev.local.mutepls.plist
+```
 
 The app appears as a compact menu bar microphone icon with a status indicator.
 
@@ -86,6 +107,8 @@ Then restart MutePls. When the fallback catches the event, Terminal logs:
 ```text
 MutePls: intercepted Play/Pause media key
 ```
+
+If Music still opens, make sure `/Applications/MutePls.app` is the app that has Accessibility permission, then quit and reopen MutePls.
 
 ## Caveat
 

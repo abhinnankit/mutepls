@@ -1,5 +1,8 @@
 .build/
 .swiftpm/
+dist/
+Assets/AppIcon.iconset/
+Assets/MutePls.icns
 DerivedData/
 *.xcodeproj/
 *.xcworkspace/
