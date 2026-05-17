@@ -14,19 +14,19 @@ It also includes a Play/Pause media-key fallback for AirPods Max 2 setups where 
 ## Build
 
 ```sh
-swift build -c release
+make build
 ```
 
 ## Run
 
 ```sh
-.build/release/mutepls
+make run
 ```
 
 ## Package as an app
 
 ```sh
-scripts/package-app.sh
+make package
 ```
 
 This creates:
@@ -38,8 +38,14 @@ dist/MutePls.app
 Install it into `/Applications`:
 
 ```sh
-scripts/install-app.sh
-open /Applications/MutePls.app
+make install
+make open
+```
+
+Install, restart, and open the app in one command:
+
+```sh
+make reinstall
 ```
 
 ## Start at login
@@ -51,18 +57,6 @@ Start at Login
 ```
 
 The item is checked when the LaunchAgent is installed.
-
-Manual fallback:
-
-```sh
-scripts/install-login-item.sh
-```
-
-Remove the manual login item:
-
-```sh
-scripts/uninstall-login-item.sh
-```
 
 The app appears as a compact menu bar microphone icon with a status indicator.
 

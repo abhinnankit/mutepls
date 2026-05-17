@@ -7,18 +7,17 @@ MutePls is a macOS menu bar utility for AirPods Max 2. It toggles the default in
 ## Build
 
 ```sh
-swift build -c release
+make build
 ```
 
 ## Package and Install
 
 ```sh
-scripts/package-app.sh
-scripts/install-app.sh
-open /Applications/MutePls.app
+make install
+make open
 ```
 
-`scripts/package-app.sh` creates `dist/MutePls.app`. `scripts/install-app.sh` copies it to `/Applications/MutePls.app`.
+`make package` creates `dist/MutePls.app`. `make install` copies it to `/Applications/MutePls.app`. `make reinstall` installs, stops a running app instance, and opens the installed app.
 
 ## App Behavior
 
