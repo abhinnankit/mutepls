@@ -207,7 +207,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(muteItem)
 
         menu.addItem(menuItem(title: "Refresh", action: #selector(refreshFromMenu(_:)), keyEquivalent: "r"))
-        if mediaKeyInterceptor?.isEventTapActive == false {
+        
+        if let interceptor = mediaKeyInterceptor, !interceptor.isEventTapActive {
             menu.addItem(menuItem(title: "Open Accessibility Settings", action: #selector(openPrivacySettings(_:)), keyEquivalent: ","))
         }
 
