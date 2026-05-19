@@ -10,6 +10,7 @@ final class RemoteCommandReceiver {
 
     func start() {
         let commandCenter = MPRemoteCommandCenter.shared()
+        removeTargets(from: commandCenter)
 
         commandCenter.playCommand.isEnabled = true
         commandCenter.pauseCommand.isEnabled = true
@@ -40,14 +41,23 @@ final class RemoteCommandReceiver {
         NSLog("MutePls: remote command receiver enabled")
     }
 
+    func restart() {
+        stop()
+        start()
+    }
+
     func stop() {
         let commandCenter = MPRemoteCommandCenter.shared()
-        commandCenter.playCommand.removeTarget(nil)
-        commandCenter.pauseCommand.removeTarget(nil)
-        commandCenter.togglePlayPauseCommand.removeTarget(nil)
+        removeTargets(from: commandCenter)
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         MPNowPlayingInfoCenter.default().playbackState = .stopped
+    }
+
+    private func removeTargets(from commandCenter: MPRemoteCommandCenter) {
+        commandCenter.playCommand.removeTarget(nil)
+        commandCenter.pauseCommand.removeTarget(nil)
+        commandCenter.togglePlayPauseCommand.removeTarget(nil)
     }
 
     private func handle(command: String) {

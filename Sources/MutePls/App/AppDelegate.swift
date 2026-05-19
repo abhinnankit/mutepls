@@ -9,8 +9,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var mediaKeyInterceptor: MediaKeyInterceptor?
     private var remoteCommandReceiver: RemoteCommandReceiver?
     private var notificationObserver: NSObjectProtocol?
+    private var workspaceObservers: [NSObjectProtocol] = []
     private var lastToggleDate = Date.distantPast
+    private var lastRearmDate = Date.distantPast
     private let toggleDebounceInterval: TimeInterval = 0.7
+    private let rearmDebounceInterval: TimeInterval = 1.0
     private var isMuted = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -28,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         setupStatusItem()
         refreshMuteState()
+        observeWorkspaceWakeEvents()
 
         notificationObserver = NotificationCenter.default.addObserver(
             forName: .muteStateDidChange,
@@ -49,6 +53,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let notificationObserver {
             NotificationCenter.default.removeObserver(notificationObserver)
         }
+        workspaceObservers.forEach {
+            NSWorkspace.shared.notificationCenter.removeObserver($0)
+        }
+        workspaceObservers.removeAll()
     }
 
     private func setupStatusItem() {
@@ -138,6 +146,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSLog("MutePls: failed to refresh mute state: \(error)")
             updateStatusIcon(error: true)
         }
+    }
+
+    private func observeWorkspaceWakeEvents() {
+        let center = NSWorkspace.shared.notificationCenter
+        let names: [Notification.Name] = [
+            NSWorkspace.didWakeNotification,
+            NSWorkspace.screensDidWakeNotification,
+            NSWorkspace.sessionDidBecomeActiveNotification
+        ]
+
+        workspaceObservers = names.map { name in
+            center.addObserver(forName: name, object: nil, queue: .main) { [weak self] notification in
+                self?.rearmInputHandlers(reason: notification.name.rawValue)
+            }
+        }
+    }
+
+    private func rearmInputHandlers(reason: String) {
+        let now = Date()
+        guard now.timeIntervalSince(lastRearmDate) >= rearmDebounceInterval else {
+            NSLog("MutePls: ignored duplicate re-arm request from \(reason)")
+            return
+        }
+        lastRearmDate = now
+
+        NSLog("MutePls: re-arming input handlers after \(reason)")
+        refreshMuteState()
+        remoteCommandReceiver?.restart()
+        mediaKeyInterceptor?.restart()
     }
 
     private func updateStatusIcon(error: Bool = false) {

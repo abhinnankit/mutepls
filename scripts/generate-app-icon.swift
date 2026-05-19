@@ -14,26 +14,32 @@ let assetsDirectory = projectDirectory.appendingPathComponent("Assets", isDirect
 let iconsetDirectory = assetsDirectory.appendingPathComponent("AppIcon.iconset", isDirectory: true)
 let iconURL = assetsDirectory.appendingPathComponent("MutePls.icns")
 
+if FileManager.default.fileExists(atPath: iconsetDirectory.path) {
+    try FileManager.default.removeItem(at: iconsetDirectory)
+}
+
 try FileManager.default.createDirectory(at: iconsetDirectory, withIntermediateDirectories: true)
 
-let iconFiles: [(name: String, pixels: CGFloat)] = [
-    ("icon_16x16.png", 16),
-    ("icon_16x16@2x.png", 32),
-    ("icon_32x32.png", 32),
-    ("icon_32x32@2x.png", 64),
-    ("icon_128x128.png", 128),
-    ("icon_128x128@2x.png", 256),
-    ("icon_256x256.png", 256),
-    ("icon_256x256@2x.png", 512),
-    ("icon_512x512.png", 512),
-    ("icon_512x512@2x.png", 1024)
+let iconFiles: [IconFile] = [
+    IconFile(pointSize: 16, scale: 1),
+    IconFile(pointSize: 16, scale: 2),
+    IconFile(pointSize: 32, scale: 1),
+    IconFile(pointSize: 32, scale: 2),
+    IconFile(pointSize: 128, scale: 1),
+    IconFile(pointSize: 128, scale: 2),
+    IconFile(pointSize: 256, scale: 1),
+    IconFile(pointSize: 256, scale: 2),
+    IconFile(pointSize: 512, scale: 1),
+    IconFile(pointSize: 512, scale: 2)
 ]
 
 for iconFile in iconFiles {
-    let image = drawIcon(size: iconFile.pixels)
-    let destination = iconsetDirectory.appendingPathComponent(iconFile.name)
+    let image = drawIcon(size: CGFloat(iconFile.pixelSize))
+    let destination = iconsetDirectory.appendingPathComponent(iconFile.fileName)
     try writePNG(image, to: destination)
 }
+
+try validateIconFiles(iconFiles, in: iconsetDirectory)
 
 let process = Process()
 process.executableURL = URL(fileURLWithPath: "/usr/bin/iconutil")
@@ -53,6 +59,25 @@ guard process.terminationStatus == 0 else {
 }
 
 print("Generated \(iconURL.path)")
+print("Generated supported macOS icon sizes:")
+iconFiles.forEach { print("  \($0.fileName) (\($0.pixelSize)x\($0.pixelSize) px)") }
+
+struct IconFile {
+    let pointSize: Int
+    let scale: Int
+
+    var pixelSize: Int {
+        pointSize * scale
+    }
+
+    var fileName: String {
+        if scale == 1 {
+            return "icon_\(pointSize)x\(pointSize).png"
+        }
+
+        return "icon_\(pointSize)x\(pointSize)@\(scale)x.png"
+    }
+}
 
 func drawIcon(size: CGFloat) -> NSImage {
     let image = NSImage(size: NSSize(width: size, height: size))
@@ -139,9 +164,20 @@ func writePNG(_ image: NSImage, to url: URL) throws {
     try png.write(to: url, options: .atomic)
 }
 
+func validateIconFiles(_ iconFiles: [IconFile], in iconsetDirectory: URL) throws {
+    let missingFiles = iconFiles
+        .map(\.fileName)
+        .filter { !FileManager.default.fileExists(atPath: iconsetDirectory.appendingPathComponent($0).path) }
+
+    guard missingFiles.isEmpty else {
+        throw IconGenerationError.missingIconFiles(missingFiles)
+    }
+}
+
 enum IconGenerationError: Error, CustomStringConvertible {
     case pngEncodingFailed(String)
     case iconutilFailed(Int32)
+    case missingIconFiles([String])
 
     var description: String {
         switch self {
@@ -149,6 +185,8 @@ enum IconGenerationError: Error, CustomStringConvertible {
             return "Could not encode PNG at \(path)"
         case let .iconutilFailed(status):
             return "iconutil failed with status \(status)"
+        case let .missingIconFiles(files):
+            return "Missing generated icon files: \(files.joined(separator: ", "))"
         }
     }
 }

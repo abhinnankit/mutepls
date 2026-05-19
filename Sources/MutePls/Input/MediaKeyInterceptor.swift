@@ -4,6 +4,7 @@ import Foundation
 
 final class MediaKeyInterceptor {
     private let onPlayPause: () -> Void
+    private let accessibilityPromptShownKey = "MutePlsAccessibilityPromptShown"
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var localMonitor: Any?
@@ -26,8 +27,13 @@ final class MediaKeyInterceptor {
     }
 
     func start() {
+        stop()
         startEventTap()
         startLocalMonitor()
+    }
+
+    func restart() {
+        start()
     }
 
     func stop() {
@@ -49,10 +55,7 @@ final class MediaKeyInterceptor {
     }
 
     private func startEventTap() {
-        let promptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
-        let options: NSDictionary = [promptKey: true]
-        let trusted = AXIsProcessTrustedWithOptions(options)
-        guard trusted else {
+        guard checkAccessibilityTrust() else {
             NSLog("MutePls: Accessibility permission is needed to intercept Play/Pause before Music opens")
             return
         }
@@ -84,6 +87,22 @@ final class MediaKeyInterceptor {
 
         CGEvent.tapEnable(tap: tap, enable: true)
         NSLog("MutePls: media-key event tap enabled")
+    }
+
+    private func checkAccessibilityTrust() -> Bool {
+        if AXIsProcessTrusted() {
+            return true
+        }
+
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: accessibilityPromptShownKey) else {
+            return false
+        }
+
+        let promptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+        let options: NSDictionary = [promptKey: true]
+        defaults.set(true, forKey: accessibilityPromptShownKey)
+        return AXIsProcessTrustedWithOptions(options)
     }
 
     private func startLocalMonitor() {

@@ -19,7 +19,7 @@ make install
 make open
 ```
 
-`make package` creates `dist/MutePls.app`, generates `Assets/MutePls.icns`, and includes it in the app bundle. `make install` always repackages before copying to `/Applications/MutePls.app`. `make reinstall` installs, stops a running app instance, waits briefly, and opens a fresh app instance with `open -n`.
+`make package` creates `dist/MutePls.app`, generates `Assets/MutePls.icns`, and includes it in the app bundle. `make install` always repackages before copying to `/Applications/MutePls.app` and registers the app with LaunchServices for Spotlight/Raycast indexing. `make reinstall` installs, stops a running app instance, waits briefly, and opens a fresh app instance with `open -n`.
 
 Generated outputs are ignored:
 
@@ -28,7 +28,7 @@ Generated outputs are ignored:
 - `Assets/AppIcon.iconset/`
 - `Assets/MutePls.icns`
 
-The source of truth for the app icon is `scripts/generate-app-icon.swift`.
+The source of truth for the app icon is `scripts/generate-app-icon.swift`. It generates the full macOS `.iconset` set: 16, 32, 128, 256, and 512 point icons at both `1x` and `2x`, including a 1024px source, then validates that every expected PNG exists before creating `MutePls.icns`.
 
 ## App Behavior
 

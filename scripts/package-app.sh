@@ -11,6 +11,7 @@ CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
 ICON_FILE="$PROJECT_DIR/Assets/MutePls.icns"
+PKGINFO_FILE="$CONTENTS_DIR/PkgInfo"
 
 cd "$PROJECT_DIR"
 swift build -c release
@@ -38,23 +39,31 @@ cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
     <string>6.0</string>
     <key>CFBundleName</key>
     <string>MutePls</string>
+    <key>CFBundleDisplayName</key>
+    <string>MutePls</string>
     <key>CFBundleIconFile</key>
-    <string>MutePls.icns</string>
+    <string>MutePls</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
     <string>0.1.0</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>2</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
     <key>LSUIElement</key>
     <true/>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
     <key>NSAppleEventsUsageDescription</key>
     <string>MutePls uses media key events to toggle microphone mute from AirPods controls.</string>
 </dict>
 </plist>
 PLIST
+
+printf "APPL????" > "$PKGINFO_FILE"
 
 touch "$APP_DIR"
 

@@ -42,6 +42,7 @@ dist/MutePls.app
 ```
 
 The package step also generates `Assets/MutePls.icns` and includes it in the app bundle.
+Generated icon sizes cover the full macOS `.iconset` set: 16, 32, 128, 256, and 512 point icons at both `1x` and `2x`, including a 1024px source.
 
 Install it into `/Applications`:
 
@@ -55,6 +56,8 @@ Install, restart, and open the app in one command:
 ```sh
 make reinstall
 ```
+
+The install step registers `/Applications/MutePls.app` with LaunchServices so launchers such as Raycast can index it.
 
 If Finder still shows the generic app icon after reinstalling, refresh Finder's icon cache for the bundle:
 

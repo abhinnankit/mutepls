@@ -15,9 +15,15 @@ fi
 
 rm -rf "$TARGET_APP"
 cp -R "$SOURCE_APP" "$TARGET_APP"
-touch "$TARGET_APP"
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
-    -f "$TARGET_APP" >/dev/null 2>&1 || true
+touch "$TARGET_APP" "$TARGET_APP/Contents" "$TARGET_APP/Contents/Info.plist" "$TARGET_APP/Contents/Resources/MutePls.icns"
+
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if ! "$LSREGISTER" -f "$TARGET_APP"; then
+    echo "Warning: LaunchServices could not register $TARGET_APP"
+    echo "Raycast may not show the app until macOS indexes it."
+fi
+
+mdimport -i "$TARGET_APP" >/dev/null 2>&1 || true
 
 echo "Installed $TARGET_APP"
 echo "Open it with:"
